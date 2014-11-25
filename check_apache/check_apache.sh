@@ -1,6 +1,5 @@
 #!/bin/bash
 host=$(hostname)
-#echo $host
 date=$(date +"%m-%d-%Y %T")
 status=$(/etc/init.d/apache2 status)
 check=$(echo "$status" |nawk -F " " 'NR=='1' {print $4}')
