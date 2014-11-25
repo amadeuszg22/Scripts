@@ -19,12 +19,12 @@ check2a=$(curl -I karlik.hyundai.pl| grep HTTP | nawk -F " " 'NR=='1' {print $2}
 	if [ "$check2" == "not" ] || [ "$check2a" -ne "200" ]; then
 	echo "$host:Critical!:$srv After restart retry"
 	echo "$host:date-Critical!:$srv After restart retry">>/tmp/check_apache.log
-        echo "$host:$date-Critical!:$srv After restart retry"| mail -s "$host:Apache Notifier Critical" ama@thedigitals.pl -r ama@thedigitals.pl
+        echo "$host:$date-Critical!:$srv After restart retry"| mail -s "$host:Apache Notifier Critical" ama@thedigitals.pl dpacholczyk@gmail.com #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 2
 	else
 	echo "$host:OK:$srv After restart retry"
 	echo "$host:$date-OK:$srv After restart retry">>/tmp/check_apache.log
-	echo "$host:$date-OK:$srv After restart retry"| mail -s "$host:Apache Notifier OK" ama@thedigitals.pl -r ama@thedigitals.pl
+	echo "$host:$date-OK:$srv After restart retry"| mail -s "$host:Apache Notifier OK" ama@thedigitals.pl dpacholczyk@gmail.com  #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 0
 	fi
 
