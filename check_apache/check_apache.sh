@@ -46,6 +46,6 @@ check2b1=$(printf '%.0f\n' $check2b)
 exit 2
 else
 echo "$host:$date-OK:$status host $dns is $checka (LOAD:$checkb)"
-echo "$host:$date-OK:$status host $dns is $checka (LOAD:$checkb)">>/tmp/check_apache.log
+echo "$host:$date-OK:$status host $dns is $checka (LOAD:$checkb)">>$ldir
 exit 0
 fi
