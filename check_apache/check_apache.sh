@@ -5,6 +5,7 @@ maxl="15" #max accepted load
 httpc="200" #http code given by server
 astate="not" # accepted state is not or empty. not if you want to check if apache is down epty if ypu want tocheck if is up 
 rcpt="ama@thedigitals.pl" #mail notification rcpt
+ldir="/tmp/check_apache.log"
 
 host=$(hostname)
 date=$(date +"%m-%d-%Y %T")
@@ -18,7 +19,7 @@ checkb1=$(printf '%.0f\n' $checkb)
 
 if [ "$check" == "$astate" ] || [ "$checka" != "$httpc" ] || [ "$checkb1" -ge "$maxl" ]; then
 echo "$host:$date-Critical!:$status restart in progress host $dns is $checka (LOAD:$checkb)"
-echo "$host:$date-Critical!:$status Restart in progress host $dns is $checka (LOAD:$checkb)">>/tmp/check_apache.log
+echo "$host:$date-Critical!:$status Restart in progress host $dns is $checka (LOAD:$checkb)">>$ldir
 null=$(/etc/init.d/apache2 restart > /dev/null 2>&1)
 sleep 2
 srv=$(/etc/init.d/apache2 status)
@@ -32,12 +33,12 @@ check2b1=$(printf '%.0f\n' $check2b)
 	
 	if [ "$check2" == "$astate" ] || [ "$check2a" != "$httpc" ] || [ "$check2b1" -ge "$maxl" ]; then
 	echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"
-	echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>/tmp/check_apache.log
+	echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>$ldir
         echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"| mail -s "$host:Apache Notifier Critical" $rcpt #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 2
 	else
 	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"
-	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>/tmp/check_apache.log
+	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>$ldir
 	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"| mail -s "$host:Apache Notifier OK" $rcpt  #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 0
 	fi
