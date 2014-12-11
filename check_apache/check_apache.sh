@@ -9,37 +9,49 @@ ldir="/tmp/check_apache.log"
 
 host=$(hostname)
 date=$(date +"%m-%d-%Y %T")
-status=$(/etc/init.d/apache2 status)
-check=$(echo "$status" |nawk -F " " 'NR=='1' {print $4}')
+apstat () {
+	status=$(/etc/init.d/apache2 status)
+	check=$(echo "$status" |nawk -F " " 'NR=='1' {print $4}')
+	echo "$check"
+if [ "$check" == "$astate" ]; then
+	return 1
+else
+	return 0
+fi
+}
+hstat (){
 checka=$(curl -I $dns | grep HTTP | nawk -F " " 'NR=='1' {print $2}')
+}
+lstat () {
 checkb=$(cat /proc/loadavg | nawk -F " " 'NR=='1' {print $1}')
 checkb1=$(printf '%.0f\n' $checkb) 
-#echo $checkb
-#echo $checkb1
+}
 
-if [ "$check" == "$astate" ] || [ "$checka" != "$httpc" ] || [ "$checkb1" -ge "$maxl" ]; then
+apstat
+ret=$?
+hstat
+lstat
+
+if [ "$ret" == 1 ] || [ "$checka" != "$httpc" ] || [ "$checkb1" -ge "$maxl" ]; then
 echo "$host:$date-Critical!:$status restart in progress host $dns is $checka (LOAD:$checkb)"
 echo "$host:$date-Critical!:$status Restart in progress host $dns is $checka (LOAD:$checkb)">>$ldir
 null=$(/etc/init.d/apache2 restart > /dev/null 2>&1)
 sleep 2
-srv=$(/etc/init.d/apache2 status)
-check2=$(echo "$srv" |nawk -F " " 'NR=='1' {print $4}')
-check2a=$(curl -I $dns | grep HTTP | nawk -F " " 'NR=='1' {print $2}')
-check2b=$(cat /proc/loadavg | nawk -F " " 'NR=='1' {print $1}')
-check2b1=$(printf '%.0f\n' $check2b)
-#echo $check2b
-#echo $check2b1
-#echo "$check2"
+
+apstat
+ret=$?
+hstat
+lstat
 	
-	if [ "$check2" == "$astate" ] || [ "$check2a" != "$httpc" ] || [ "$check2b1" -ge "$maxl" ]; then
-	echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"
-	echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>$ldir
-        echo "$host:$date-Critical!:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"| mail -s "$host:Apache Notifier Critical" $rcpt #ama@thedigitals.pl -r ama@thedigitals.pl
+	if [ "$ret" == "1" ] || [ "$checka" != "$httpc" ] || [ "$checkb1" -ge "$maxl" ]; then
+	echo "$host:$date-Critical!:$status After restart retry host $dns is $checka (LOAD:$checkb)"
+	echo "$host:$date-Critical!:$status After restart retry host $dns is $checka (LOAD:$checkb)">>$ldir
+        echo "$host:$date-Critical!:$status After restart retry host $dns is $checka (LOAD:$checkb)"| mail -s "$host:Apache Notifier Critical" $rcpt #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 2
 	else
-	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"
-	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)">>$ldir
-	echo "$host:$date-OK:$srv After restart retry host $dns is $check2a (LOAD:$check2b)"| mail -s "$host:Apache Notifier OK" $rcpt  #ama@thedigitals.pl -r ama@thedigitals.pl
+	echo "$host:$date-OK:$status After restart retry host $dns is $checka (LOAD:$checkb)"
+	echo "$host:$date-OK:$status After restart retry host $dns is $checka (LOAD:$checkb)">>$ldir
+	echo "$host:$date-OK:$status After restart retry host $dns is $checka (LOAD:$checkb)"| mail -s "$host:Apache Notifier OK" $rcpt  #ama@thedigitals.pl -r ama@thedigitals.pl
 	exit 0
 	fi
 
